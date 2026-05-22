@@ -12,6 +12,19 @@ router.post('/register', async (req, res) => {
     return res.status(400).json({ error: 'Tutti i campi sono obbligatori' });
   }
 
+  if (username.length < 3) {
+    return res.status(400).json({ error: 'L\'username deve avere almeno 3 caratteri' });
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return res.status(400).json({ error: 'Formato email non valido' });
+  }
+
+  if (password.length < 6) {
+    return res.status(400).json({ error: 'La password deve avere almeno 6 caratteri' });
+  }
+
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
     const result = run('INSERT INTO users (username, email, password) VALUES (?, ?, ?)', [username, email, hashedPassword]);
@@ -29,6 +42,7 @@ router.post('/register', async (req, res) => {
       points: 0 
     });
   } catch (err) {
+    console.error("Errore nel POST /register:", err);
     if (err.message.includes('UNIQUE constraint failed')) {
       return res.status(409).json({ error: 'Username o email già in uso' });
     }
@@ -70,6 +84,7 @@ router.post('/login', async (req, res) => {
       points: user.points
     });
   } catch (err) {
+    console.error("Errore nel POST /login:", err);
     res.status(500).json({ error: 'Errore interno del server' });
   }
 });
@@ -100,6 +115,7 @@ router.get('/me', (req, res) => {
     
     res.json(user);
   } catch (err) {
+    console.error("Errore nel GET /me:", err);
     res.status(500).json({ error: 'Errore interno del server' });
   }
 });

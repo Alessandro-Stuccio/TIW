@@ -27,6 +27,7 @@ router.get('/', (req, res) => {
 
     res.json(missions);
   } catch (err) {
+    console.error("Errore nel GET /:", err);
     res.status(500).json({ error: 'Errore nel recupero delle missioni' });
   }
 });
@@ -51,6 +52,7 @@ router.get('/:id', (req, res) => {
 
     res.json({ mission, completion });
   } catch (err) {
+    console.error("Errore nel GET /:id:", err);
     res.status(500).json({ error: 'Errore nel recupero della missione' });
   }
 });
@@ -72,6 +74,7 @@ router.post('/', requireAdmin, (req, res) => {
 
     res.status(201).json({ id: result.lastInsertRowid, message: 'Missione creata' });
   } catch (err) {
+    console.error("Errore nel POST /:", err);
     res.status(500).json({ error: 'Errore nella creazione della missione' });
   }
 });
@@ -96,6 +99,7 @@ router.put('/:id', requireAdmin, (req, res) => {
 
     res.json({ message: 'Missione aggiornata con successo' });
   } catch (err) {
+    console.error("Errore nel PUT /:id:", err);
     res.status(500).json({
       error: "Errore nell'aggiornamento della missione" });
   }
@@ -115,6 +119,7 @@ router.delete('/:id', requireAdmin, (req, res) => {
 
     res.json({ message: 'Missione archiviata con successo' });
   } catch (err) {
+    console.error("Errore nel DELETE /:id:", err);
     res.status(500).json({
       error: "Errore nell'archiviazione della missione" });
   }

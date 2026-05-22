@@ -53,6 +53,7 @@ router.get('/my', requireAuth, (req, res) => {
     );
     res.json(completions);
   } catch (err) {
+    console.error("Errore nel GET /my:", err);
     res.status(500).json({ error: 'Errore nel recupero completamenti' });
   }
 });
@@ -71,6 +72,7 @@ router.get('/pending', requireModerator, (req, res) => {
     );
     res.json(rows);
   } catch (err) {
+    console.error("Errore nel GET /pending:", err);
     res.status(500).json({ error: 'Errore nel recupero prove in attesa' });
   }
 });
@@ -90,6 +92,7 @@ router.post('/missions/:missionId/accept', requireAuth, (req, res) => {
     );
     res.status(201).json({ id: result.lastInsertRowid, message: 'Missione accettata' });
   } catch (err) {
+    console.error("Errore nel POST /missions/:missionId/accept:", err);
     if (err.message.includes('UNIQUE constraint failed')) {
       return res.status(409).json({ error: 'Hai già accettato questa missione' });
     }
@@ -118,6 +121,7 @@ router.post('/missions/:missionId/submit', requireAuth, upload.single('proof_ima
     }
     res.json({ message: 'Prova inviata con successo' });
   } catch (err) {
+    console.error("Errore nel POST /missions/:missionId/submit:", err);
     res.status(500).json({ error: "Errore nell'invio della prova" });
   }
 });
@@ -146,6 +150,7 @@ router.post('/:id/verify', requireModerator, (req, res) => {
 
     res.json({ message: 'Prova verificata e punti assegnati', newBadges });
   } catch (err) {
+    console.error("Errore nel POST /:id/verify:", err);
     res.status(500).json({ error: 'Errore durante la verifica' });
   }
 });
@@ -164,6 +169,7 @@ router.post('/:id/reject', requireModerator, (req, res) => {
     );
     res.json({ message: 'Prova rifiutata' });
   } catch (err) {
+    console.error("Errore nel POST /:id/reject:", err);
     res.status(500).json({ error: 'Errore durante il rifiuto' });
   }
 });

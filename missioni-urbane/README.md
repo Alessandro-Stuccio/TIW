@@ -1,47 +1,45 @@
 # Agenzia di Missioni Urbane
 
-Piattaforma per agenti sul campo: scopri missioni nella tua città, completale e scala la classifica globale.
+L'Agenzia di Missioni Urbane è una piattaforma web interattiva che permette agli utenti di scoprire e partecipare a missioni nel mondo reale. Gli utenti possono accettare sfide, inviare prove del loro completamento e scalare la classifica guadagnando punti e badge.
 
-## Tecnologie
+> **Livello Raggiunto:** Il progetto implementa con successo tutti i requisiti fino al **Livello 3**.
 
-- **Backend**: Node.js, Express (ES Modules)
-- **Database**: SQLite (better-sqlite3)
-- **Autenticazione**: express-session, bcrypt
-- **Real-Time**: Socket.io (per la leaderboard)
-- **Upload**: multer
-- **Frontend**: HTML, CSS, Vanilla JS
-- **Mappa**: Leaflet.js
+## Estensioni Tecniche (Livello 3)
+Il progetto include funzionalità avanzate che rispettano le specifiche del Livello 3:
+- **Leaflet.js**: Utilizzato per la visualizzazione e l'interazione con la mappa interattiva delle missioni.
+- **Multer**: Implementato per gestire l'upload fisico delle immagini come prova di completamento delle missioni.
+- **Socket.io**: Integrato per garantire l'aggiornamento in tempo reale della classifica (Leaderboard) senza necessità di ricaricare la pagina.
 
-## Installazione
+## Prerequisiti
+- **Node.js v22+** (Strettamente richiesto in quanto il progetto fa uso del modulo nativo `node:sqlite`).
 
-1. Clona la repository o assicurati di essere nella cartella corretta.
-2. Esegui il comando di installazione:
-   ```bash
-   npm install
-   ```
-3. Inizializza il database con i dati di test (missioni, badge, utenti admin):
-   ```bash
-   npm run seed
-   ```
-4. Avvia il server:
-   ```bash
-   npm start
-   ```
-   *(o `npm run dev` per abilitare l'hot reload del backend)*
+## Installazione e Avvio
 
-## Utenti di test
+Per configurare ed eseguire il progetto in locale, segui questi passaggi:
 
-Sono disponibili tre account di test per provare i vari ruoli del sistema:
-- **Admin**: `email`: `admin@missioni.it` - `password`: `admin123`
-- **Moderatore**: `email`: `mod@missioni.it` - `password`: `mod123`
-- **Utente**: `email`: `mario@missioni.it` - `password`: `user123`
+1. Installa le dipendenze:
+```bash
+npm install
+```
 
-## Funzionalità principali
+2. Popola il database con i dati iniziali (seed):
+```bash
+npm run seed
+```
 
-- Registrazione e Login.
-- Visualizzazione mappa interattiva con Leaflet.
-- Filtro missioni per difficoltà e categoria.
-- Upload delle prove fotografiche.
-- Assegnazione dinamica di badge.
-- Dashboard admin per creazione missioni e validazione prove.
-- Classifica globale in tempo reale.
+3. Avvia il server di sviluppo:
+```bash
+npm run dev
+```
+
+Il server sarà accessibile all'indirizzo `http://localhost:3000` (o alla porta specificata nel tuo ambiente).
+
+## Credenziali di Test
+
+Il comando `npm run seed` genera automaticamente nel database alcuni utenti predefiniti per testare i diversi ruoli della piattaforma:
+
+| Ruolo | Username | Password |
+| :--- | :--- | :--- |
+| **Admin** | admin | admin123 |
+| **Moderatore** | moderatore1 | mod123 |
+| **Utente** | agente_mario | user123 |

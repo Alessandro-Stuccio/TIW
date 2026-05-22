@@ -9,6 +9,7 @@ router.get('/leaderboard', (req, res) => {
     const leaderboard = all('SELECT id, username, points FROM users ORDER BY points DESC LIMIT 50', []);
     res.json(leaderboard);
   } catch (err) {
+    console.error("Errore nel GET /leaderboard:", err);
     res.status(500).json({ error: 'Errore nel recupero della leaderboard' });
   }
 });
@@ -34,6 +35,7 @@ router.get('/:id/profile', (req, res) => {
     
     res.json({ user, badges });
   } catch (err) {
+    console.error("Errore nel GET /:id/profile:", err);
     res.status(500).json({ error: 'Errore nel recupero del profilo' });
   }
 });
