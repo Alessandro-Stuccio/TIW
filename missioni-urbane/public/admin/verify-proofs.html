@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verifica Prove - HQ</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/components.css">
+</head>
+
+<body>
+  <header>
+    <div class="container header-content">
+      <div class="logo">
+        AMU <span class="text-amber"
+          style="font-size: 0.9rem; margin-left: 10px;">[HQ]</span>
+      </div>
+      <nav>
+        <ul id="main-nav"></ul>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <h1 class="mb-4 text-amber">Verifica Prove Agenti</h1>
+    <div id="alert-container"></div>
+
+    <div id="proofs-container" class="grid grid-2">
+      <!-- Prove in attesa renderizzate qui -->
+    </div>
+  </main>
+
+  <script type="module">
+    import { fetchAPI, setupHeader, showAlert } from '../js/api.js';
+
+    let currentUser = null;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      currentUser = await setupHeader();
+      if (!currentUser || (currentUser.role !== 'admin' && currentUser.role !== 'moderator')) {
+        window.location.href = '/index.html';
+        return;
+      }
+
+      await loadPending();
+    });
+
+    async function loadPending() {
+      try {
+        const proofs = await fetchAPI('/completions/pending');
+        renderProofs(proofs);
+      } catch (err) {
+        document.getElementById('proofs-container').innerHTML = `<p class="text-red">Errore caricamento prove: ${err.message}</p>`;
+      }
+    }
+
+    function renderProofs(proofs) {
+      const container = document.getElementById('proofs-container');
+
+      // Filtra le prove dell'utente corrente (non può verificare se stesso)
+      const visibleProofs = proofs.filter(p => p.user_id !== currentUser.id);
+
+      if (visibleProofs.length === 0) {
+        container.innerHTML = '<p class="text-muted" style="grid-column: 1/-1;">Nessuna prova in attesa di verifica al momento.</p>';
+        return;
+      }
+
+      container.innerHTML = visibleProofs.map(p => `
+        <div class="card" id="proof-${p.id}">
+          <h3 class="card-title text-green">${p.mission_title}</h3>
+          <p class="text-muted mb-2">Agente: <strong>${p.username}</strong></p>
+          
+          <div style="background: var(--bg-primary); padding: 10px; border-radius: 4px; margin-bottom: 15px;">
+            ${p.proof_text ? `<p class="mb-2"><strong>Note:</strong> ${p.proof_text}</p>` : ''}
+            ${p.proof_image ? `
+              <div>
+                <strong>Foto allegata:</strong><br>
+                <a href="${p.proof_image}" target="_blank" title="Clicca per ingrandire la foto in una nuova scheda">
+                  <img src="${p.proof_image}" alt="Prova fotografica" style="max-width: 100%; max-height: 200px; border-radius: 4px; margin-top: 10px; border: 1px solid var(--border); cursor: zoom-in; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+                </a>
+              </div>
+            ` : ''}
+          </div>
+          
+          <div class="mb-3">
+            <input type="text" id="feedback-${p.id}" class="form-control" placeholder="Feedback (richiesto per rifiuto)">
+          </div>
+
+          <div style="display: flex; gap: 10px;">
+            <button class="btn btn-primary flex-1" onclick="verifyProof(${p.id})">Approva</button>
+            <button class="btn btn-danger flex-1" onclick="rejectProof(${p.id})">Rifiuta</button>
+          </div>
+        </div >
+        `).join('');
+    }
+
+    window.verifyProof = async (id) => {
+      try {
+        const res = await fetchAPI(`/completions/${id}/verify`, { method: 'POST' });
+        showAlert('alert-container', 'Prova approvata con successo!', 'success');
+        
+        if (res.newBadges && res.newBadges.length > 0) {
+          console.log("L'utente ha guadagnato nuovi badge:", res.newBadges);
+        }
+        
+        document.getElementById(`proof-${id}`).remove();
+        
+        // Controlla se era l'ultima
+        if (document.querySelectorAll('#proofs-container .card').length === 0) {
+          loadPending();
+        }
+      } catch (err) {
+        showAlert('alert-container', err.message);
+      }
+    };
+
+    window.rejectProof = async (id) => {
+      const feedback = document.getElementById(`feedback-${id}`).value;
+      if (!feedback.trim()) {
+        showAlert('alert-container', 'Devi inserire un feedback per rifiutare la prova.');
+        return;
+      }
+      
+      try {
+        await fetchAPI(`/completions/${id}/reject`, {
+          method: 'POST',
+          body: JSON.stringify({ feedback })
+        });
+        showAlert('alert-container', 'Prova rifiutata.', 'success');
+        document.getElementById(`proof-${id}`).remove();
+        
+        if (document.querySelectorAll('#proofs-container .card').length === 0) {
+          loadPending();
+        }
+      } catch (err) {
+        showAlert('alert-container', err.message);
+      }
+    };
+  </script>
+  <footer class="container">
+    <div>AMU &mdash; Roma, 2025</div>
+    <div>Progetto universitario</div>
+  </footer>
+</body>
+
+</html>

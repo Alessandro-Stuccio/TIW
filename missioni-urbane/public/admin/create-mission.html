@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crea Missione - HQ</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/components.css">
+</head>
+<body>
+  <header>
+    <div class="container header-content">
+      <div class="logo">
+        AMU <span class="text-amber" style="font-size: 0.9rem; margin-left: 10px;">[HQ]</span>
+      </div>
+      <nav>
+        <ul id="main-nav"></ul>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <div style="max-width: 800px; margin: 0 auto;">
+      <h1 class="mb-3 text-amber">Crea Nuova Missione</h1>
+      <div id="alert-container"></div>
+      
+      <div class="card">
+        <form id="create-form">
+          <div class="form-group">
+            <label class="form-label">Titolo Operazione</label>
+            <input type="text" id="title" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Descrizione / Obiettivo</label>
+            <textarea id="description" class="form-control" required></textarea>
+          </div>
+          
+          <div class="grid grid-2">
+            <div class="form-group">
+              <label class="form-label">Luogo Geografico (Testo)</label>
+              <input type="text" id="location" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Punti Ricompensa</label>
+              <input type="number" id="points" class="form-control" value="10" required>
+            </div>
+          </div>
+
+          <div class="grid grid-2">
+            <div class="form-group">
+              <label class="form-label">Latitudine (Opzionale, per mappa)</label>
+              <input type="number" step="any" id="lat" class="form-control">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Longitudine (Opzionale, per mappa)</label>
+              <input type="number" step="any" id="lng" class="form-control">
+            </div>
+          </div>
+
+          <div class="grid grid-2">
+            <div class="form-group">
+              <label class="form-label">Categoria</label>
+              <select id="category" class="form-control">
+                <option value="esplorazione">Esplorazione</option>
+                <option value="arte">Arte</option>
+                <option value="fotografia">Fotografia</option>
+                <option value="storia">Storia</option>
+                <option value="natura">Natura</option>
+                <option value="sfida">Sfida</option>
+                <option value="cultura">Cultura</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Difficoltà</label>
+              <select id="difficulty" class="form-control">
+                <option value="facile">Facile</option>
+                <option value="media">Media</option>
+                <option value="difficile">Difficile</option>
+                <option value="estrema">Estrema</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 15px; margin-top: 20px;">
+            <button type="submit" class="btn btn-primary btn-block">Inizializza Operazione</button>
+            <a href="/admin/index.html" class="btn-link text-center">&larr; torna indietro</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <script type="module">
+    import { fetchAPI, setupHeader, showAlert } from '../js/api.js';
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const user = await setupHeader();
+      if (!user || user.role !== 'admin') {
+        window.location.href = '/index.html';
+      }
+    });
+
+    document.getElementById('create-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = e.target.querySelector('button[type="submit"]');
+      
+      const payload = {
+        title: document.getElementById('title').value,
+        description: document.getElementById('description').value,
+        location: document.getElementById('location').value,
+        points: parseInt(document.getElementById('points').value),
+        lat: parseFloat(document.getElementById('lat').value) || null,
+        lng: parseFloat(document.getElementById('lng').value) || null,
+        category: document.getElementById('category').value,
+        difficulty: document.getElementById('difficulty').value
+      };
+
+      try {
+        btn.disabled = true;
+        await fetchAPI('/missions', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+        showAlert('alert-container', 'Missione creata con successo!', 'success');
+        e.target.reset();
+      } catch (err) {
+        showAlert('alert-container', err.message);
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  </script>
+  <footer class="container">
+    <div>AMU &mdash; Roma, 2025</div>
+    <div>Progetto universitario</div>
+  </footer>
+</body>
+</html>

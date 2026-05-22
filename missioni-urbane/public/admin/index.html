@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HQ Admin - Agenzia Missioni Urbane</title>
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/components.css">
+</head>
+<body>
+  <header>
+    <div class="container header-content">
+      <div class="logo">
+        AMU <span class="text-amber" style="font-size: 0.9rem; margin-left: 10px;">[HQ]</span>
+      </div>
+      <nav>
+        <ul id="main-nav"></ul>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <h1 class="mb-4 text-amber">Quartier Generale</h1>
+    
+    <div class="grid grid-2">
+      <div class="card" id="admin-only-section" style="display: none;">
+        <h2 class="card-title text-green">Gestione Missioni</h2>
+        <div class="table-responsive">
+          <table style="width: 100%; text-align: left; border-collapse: collapse;">
+            <thead>
+              <tr style="border-bottom: 1px solid var(--border);">
+                <th style="padding: 10px;">Titolo</th>
+                <th style="padding: 10px;">Punti</th>
+                <th style="padding: 10px;">Difficoltà</th>
+                <th style="padding: 10px;">Stato</th>
+                <th style="padding: 10px;">Azione</th>
+              </tr>
+            </thead>
+            <tbody id="missions-body">
+              <tr><td colspan="5" class="text-muted" style="padding: 10px;">Caricamento...</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="card-body mb-3">Crea nuove operazioni per gli agenti sul campo.</p>
+        <a href="/admin/create-mission.html" class="btn btn-primary">Crea Nuova Missione</a>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title text-green">Verifica Prove</h2>
+        <p class="card-body mb-3">Analizza le prove inviate dagli agenti e assegna i punteggi.</p>
+        <a href="/admin/verify-proofs.html" class="btn btn-primary">Vai alla Verifica</a>
+      </div>
+    </div>
+  </main>
+
+  <script type="module">
+    import { setupHeader } from '../js/api.js';
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const user = await setupHeader();
+      if (!user || (user.role !== 'admin' && user.role !== 'moderator')) {
+        window.location.href = '/index.html';
+        return;
+      }
+      
+      if (user.role === 'admin') {
+        document.getElementById('admin-only-section').style.display = 'block';
+      }
+    });
+  </script>
+  <footer class="container">
+    <div>AMU &mdash; Roma, 2025</div>
+    <div>Progetto universitario</div>
+  </footer>
+</body>
+</html>
