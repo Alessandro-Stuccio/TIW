@@ -59,10 +59,6 @@ router.post('/:id/verify', requireModerator, async (req, res) => {
     
     verifyCompletion(req.params.id, req.session.userId);
     
-    // Assegna i punti all'utente (static import bypass)
-    const { default: db } = await import('../db/database.js');
-    db.prepare('UPDATE users SET points = points + ? WHERE id = ?').run(comp.points, comp.user_id);
-    
     res.redirect('/completions/pending');
   } catch (err) {
     console.error("Errore verify:", err);

@@ -21,6 +21,7 @@ import authRoutes from './routes/auth.js';
 import missioniRoutes from './routes/missioni.js';
 import completamentiRoutes from './routes/completamenti.js';
 import usersRoutes from './routes/users.js';
+import adminRoutes from './routes/admin.js';
 
 const app = express();
 const httpServer = createServer(app);
@@ -29,6 +30,7 @@ const httpServer = createServer(app);
 app.engine('hbs', engine({ 
   extname: '.hbs', 
   defaultLayout: 'main',
+  partialsDir: path.join(__dirname, '../views/partials'),
   helpers: {
     eq: (a, b) => a === b
   }
@@ -69,7 +71,8 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    maxAge: 7 * 24 * 60 * 60 * 1000 // 1 settimana
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 1 settimana
+    httpOnly: true
   }
 }));
 
@@ -100,6 +103,18 @@ app.use('/auth', authRoutes);
 app.use('/missions', missioniRoutes);
 app.use('/completions', completamentiRoutes);
 app.use('/users', usersRoutes);
+app.use('/admin', adminRoutes);
+
+// Middleware per il 404
+app.use((req, res) => {
+  res.status(404).render('errors/404');
+});
+
+// Middleware globale per il 500
+app.use((err, req, res, next) => {
+  console.error(err);
+  res.status(500).render('errors/500', { message: 'Errore interno del server' });
+});
 
 // Avvio server
 const PORT = process.env.PORT || 3000;

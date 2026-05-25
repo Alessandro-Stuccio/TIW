@@ -1,0 +1,31 @@
+<header>
+  <div class="container header-content">
+    <div class="logo">
+      <a href="/" style="text-decoration:none; color:inherit;">AMU</a>
+    </div>
+    <nav>
+      <ul id="main-nav" style="display:flex; list-style:none; gap:15px; align-items:center;">
+        <li><a href="/">Missioni</a></li>
+        <li><a href="/users/leaderboard">Classifica</a></li>
+        {{#if user}}
+          <li><span>Agent: {{user.username}}</span></li>
+          <li><a href="/users/dashboard">Il mio Profilo</a></li>
+          {{#if (eq user.role 'admin')}} 
+            <li><a href="/admin">HQ Admin</a></li> 
+          {{/if}}
+          {{#if (eq user.role 'moderator')}}
+            <li><a href="/completions/pending">Verifica Prove</a></li>
+          {{/if}}
+          <li>
+            <form action="/auth/logout" method="POST" style="display:inline;">
+              <button type="submit" class="btn btn-primary" style="padding: 5px 10px; font-size: 0.9rem;">Esci</button>
+            </form>
+          </li>
+        {{else}}
+          <li><a href="/auth/login">Login</a></li>
+          <li><a href="/auth/register" class="btn btn-primary" style="padding: 5px 10px; font-size: 0.9rem;">Registrati</a></li>
+        {{/if}}
+      </ul>
+    </nav>
+  </div>
+</header>
