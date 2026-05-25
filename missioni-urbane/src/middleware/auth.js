@@ -6,14 +6,14 @@ export const requireAuth = (req, res, next) => {
 };
 
 export const requireAdmin = (req, res, next) => {
-  if (req.session && req.session.userId && req.session.userRole === 'admin') {
+  if (req.session && req.session.userId && req.session.role === 'admin') {
     return next();
   }
   res.status(403).render('errors/500', { message: 'Accesso negato. Permessi insufficienti.' });
 };
 
 export const requireModerator = (req, res, next) => {
-  if (req.session && req.session.userId && (req.session.userRole === 'admin' || req.session.userRole === 'moderator')) {
+  if (req.session && req.session.userId && (req.session.role === 'admin' || req.session.role === 'moderator')) {
     return next();
   }
   res.status(403).render('errors/500', { message: 'Accesso negato. Permessi insufficienti.' });

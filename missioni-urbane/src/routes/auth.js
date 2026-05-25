@@ -37,7 +37,6 @@ router.post('/register', async (req, res) => {
     
     // Auto login
     req.session.userId = userId;
-    req.session.userRole = 'user';
     req.session.role = 'user';
     req.session.username = username;
     
@@ -80,7 +79,6 @@ router.post('/login', async (req, res) => {
     
     // Setup session
     req.session.userId = user.id;
-    req.session.userRole = user.role;
     req.session.role = user.role;
     req.session.username = user.username;
     

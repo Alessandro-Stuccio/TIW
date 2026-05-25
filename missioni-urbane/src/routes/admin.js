@@ -36,6 +36,8 @@ router.get('/verify-proofs', requireModerator, (req, res) => {
 router.post('/verify-proofs/:id/approve', requireModerator, (req, res) => {
   try {
     verifyCompletion(req.params.id, req.session.userId);
+    const io = req.app.get('io');
+    if (io) io.emit('leaderboard_update', { message: 'Classifica aggiornata' });
     res.redirect('/admin/verify-proofs');
   } catch (err) {
     console.error("Errore verify:", err);
