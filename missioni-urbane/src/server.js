@@ -6,6 +6,8 @@ import { Server } from 'socket.io';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { engine } from 'express-handlebars';
+import { getAll } from './repositories/missions.repo.js';
 
 // Carica variabili d'ambiente
 dotenv.config();
@@ -23,9 +25,20 @@ import usersRoutes from './routes/users.js';
 const app = express();
 const httpServer = createServer(app);
 
+// Configura Handlebars per SSR
+app.engine('hbs', engine({ 
+  extname: '.hbs', 
+  defaultLayout: 'main',
+  helpers: {
+    eq: (a, b) => a === b
+  }
+}));
+app.set('view engine', 'hbs');
+app.set('views', path.join(__dirname, '../views'));
+
 // Configura Socket.io
 const io = new Server(httpServer, {
-  cors: { origin: '*' } // O configura per ambiente specifico
+  cors: { origin: '*' }
 });
 app.set('io', io);
 
@@ -42,8 +55,8 @@ app.use(express.urlencoded({ extended: true }));
 
 // Serve file statici
 app.use('/favicon.ico', (req, res) => res.status(204).end());
-app.use(express.static(path.join(__dirname, 'public')));
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use(express.static(path.join(__dirname, '../public')));
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Configura Sessioni
 const SQLiteStore = SQLiteStoreFactory(session);
@@ -60,11 +73,33 @@ app.use(session({
   }
 }));
 
-// API Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/missions', missioniRoutes);
-app.use('/api/completions', completamentiRoutes);
-app.use('/api/users', usersRoutes);
+// Middleware globale per i dati utente nelle viste
+app.use((req, res, next) => {
+  res.locals.user = req.session.userId ? { 
+    id: req.session.userId, 
+    role: req.session.role, 
+    username: req.session.username 
+  } : null;
+  next();
+});
+
+// Home Page SSR
+app.get('/', (req, res) => {
+  try {
+    const { category, difficulty } = req.query;
+    const missions = getAll(category, difficulty);
+    res.render('home', { missions, category, difficulty });
+  } catch (err) {
+    console.error("Errore nel GET /:", err);
+    res.status(500).send('Errore interno');
+  }
+});
+
+// SSR Routes
+app.use('/auth', authRoutes);
+app.use('/missions', missioniRoutes);
+app.use('/completions', completamentiRoutes);
+app.use('/users', usersRoutes);
 
 // Avvio server
 const PORT = process.env.PORT || 3000;

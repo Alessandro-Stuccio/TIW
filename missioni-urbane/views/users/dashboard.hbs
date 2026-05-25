@@ -1,0 +1,43 @@
+<a href="/" class="btn btn-outline mb-3">&larr; Torna alle missioni</a>
+<div class="card mb-3">
+  <h2 class="text-green">Profilo di {{userProfile.username}}</h2>
+  <p><strong>Ruolo:</strong> {{userProfile.role}}</p>
+  <p><strong>Punti:</strong> <span style="color: var(--accent-amber); font-weight: bold;">{{userProfile.points}}</span></p>
+  <p><strong>Data Registrazione:</strong> {{userProfile.created_at}}</p>
+</div>
+
+{{#if badges.length}}
+<div class="card mb-3">
+  <h3>Badges Ottenuti</h3>
+  <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-top: 15px;">
+    {{#each badges}}
+      <div style="text-align: center; width: 120px; background: var(--bg-elevated); padding: 15px; border-radius: 8px;">
+        <div style="font-size: 2.5rem; margin-bottom: 5px;">{{icon}}</div>
+        <div style="font-size: 0.9rem; font-weight: bold;">{{name}}</div>
+      </div>
+    {{/each}}
+  </div>
+</div>
+{{/if}}
+
+<div class="card">
+  <h3>Le mie Missioni</h3>
+  {{#if completions.length}}
+    <ul style="list-style: none; padding: 0; margin-top: 15px;">
+      {{#each completions}}
+        <li style="border-bottom: 1px solid var(--border); padding: 15px 0;">
+          <strong>{{title}}</strong> ({{mission_points}} punti)
+          <div style="margin-top: 5px;">
+            Stato: <span class="tag tag-{{status}}">{{status}}</span>
+            Categoria: <span class="tag">{{category}}</span>
+          </div>
+          <div style="margin-top: 10px;">
+            <a href="/missions/{{mission_id}}" class="btn btn-outline" style="padding: 5px 10px; font-size: 0.8rem;">Dettagli</a>
+          </div>
+        </li>
+      {{/each}}
+    </ul>
+  {{else}}
+    <p class="text-muted mt-3">Non hai ancora accettato nessuna missione.</p>
+  {{/if}}
+</div>

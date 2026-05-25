@@ -252,3 +252,87 @@ textarea.form-control {
   -webkit-overflow-scrolling: touch;
   margin-bottom: 20px;
 }
+
+/* Custom Map Marker */
+.custom-neon-marker {
+  background: transparent;
+  border: none;
+}
+
+.neon-marker {
+  width: 16px;
+  height: 16px;
+  background-color: var(--accent-green);
+  border-radius: 50%;
+  box-shadow: 0 0 10px var(--accent-green), 0 0 20px var(--accent-green);
+  border: 2px solid var(--bg-primary);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.7); }
+  70% { box-shadow: 0 0 0 15px rgba(0, 255, 136, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(0, 255, 136, 0); }
+}
+
+/* Custom Leaflet Popup */
+.leaflet-popup-content-wrapper, .leaflet-popup-tip {
+  background: var(--bg-surface) !important;
+  color: var(--text-primary) !important;
+  box-shadow: 0 0 15px rgba(0, 255, 136, 0.2) !important;
+}
+
+.leaflet-popup-content-wrapper {
+  border: 1px solid var(--accent-green);
+  border-radius: 4px !important;
+}
+
+.leaflet-popup-tip {
+  /* leaflet ruota questo div di 45 gradi, i bordi in basso a destra formano la punta */
+  border-bottom: 1px solid var(--accent-green);
+  border-right: 1px solid var(--accent-green);
+}
+
+.leaflet-popup-content {
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  margin: 15px !important;
+  line-height: 1.4 !important;
+}
+
+.leaflet-popup-content b {
+  color: var(--accent-green);
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  display: block;
+  margin-bottom: 5px;
+}
+
+.leaflet-popup-content a {
+  display: block;
+  margin-top: 10px;
+  background: rgba(0, 255, 136, 0.1);
+  color: var(--accent-green) !important;
+  border: 1px solid var(--accent-green);
+  padding: 5px 10px;
+  border-radius: 2px;
+  text-decoration: none;
+  font-weight: 600;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.leaflet-popup-content a:hover {
+  background: var(--accent-green);
+  color: var(--bg-primary) !important;
+  box-shadow: 0 0 10px rgba(0, 255, 136, 0.4);
+}
+
+.leaflet-container a.leaflet-popup-close-button {
+  color: var(--text-muted) !important;
+  padding: 4px 4px 0 0 !important;
+}
+
+.leaflet-container a.leaflet-popup-close-button:hover {
+  color: var(--accent-red) !important;
+}

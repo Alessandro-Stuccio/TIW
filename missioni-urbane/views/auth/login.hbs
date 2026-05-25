@@ -1,0 +1,20 @@
+<a href="/" class="btn btn-outline mb-3">&larr; Torna alle missioni</a>
+<div style="max-width: 400px; margin: 0 auto; margin-top: 50px;">
+  <div class="card">
+    <h2 class="card-title text-green text-center mb-3">Bentornato.</h2>
+    <form action="/auth/login" method="POST">
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input type="email" name="email" class="form-control" placeholder="La tua email" required value="{{email}}">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input type="password" name="password" class="form-control" placeholder="La tua password" required>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block mb-2">Entra</button>
+    </form>
+    <div class="text-center" style="font-size: 0.8rem;">
+      <span class="text-muted">Nuova recluta?</span> <a href="/auth/register">Richiedi accreditamento</a>
+    </div>
+  </div>
+</div>

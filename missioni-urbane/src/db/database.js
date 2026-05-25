@@ -1,16 +1,11 @@
-import { DatabaseSync } from 'node:sqlite';
+import Database from 'better-sqlite3';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const db = new DatabaseSync(path.join(__dirname, 'missioni.db'));
-
-db.exec(`PRAGMA journal_mode = WAL`);
-db.exec(`PRAGMA foreign_keys = ON`);
-
-export const run = (sql, params = []) => db.prepare(sql).run(...params);
-export const get = (sql, params = []) => db.prepare(sql).get(...params);
-export const all = (sql, params = []) => db.prepare(sql).all(...params);
+const db = new Database(path.join(__dirname, 'missioni.db'));
+db.pragma('journal_mode = WAL');
+db.pragma('foreign_keys = ON');
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS users (

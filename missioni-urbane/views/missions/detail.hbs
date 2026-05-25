@@ -1,0 +1,63 @@
+<a href="/" class="btn btn-outline mb-3">&larr; Torna alle missioni</a>
+
+<div class="card" style="margin-bottom: 20px;">
+  <h2 class="card-title text-green">{{mission.title}}</h2>
+  <div class="mb-3">
+    <span class="tag tag-{{mission.difficulty}}">{{mission.difficulty}}</span>
+    <span class="tag">{{mission.category}}</span>
+  </div>
+  <p class="mb-3">{{mission.description}}</p>
+  <ul class="mb-3" style="list-style: none; padding: 0;">
+    <li class="mb-1"><strong>Location:</strong> {{mission.location}}</li>
+    <li class="mb-1"><strong>Ricompensa:</strong> <span style="color: var(--accent-amber);">{{mission.points}} punti</span></li>
+    <li class="mb-1"><strong>Stato:</strong> {{mission.status}}</li>
+  </ul>
+
+  {{#if user}}
+    {{#if completion}}
+      <div class="alert alert-info">
+        <strong>Stato Missione:</strong> {{completion.status}}
+      </div>
+      {{#if (eq completion.status 'accettata')}}
+        <h4 class="mt-3 mb-2">Invia la tua prova</h4>
+        <form action="/completions/missions/{{mission.id}}/submit" method="POST" enctype="multipart/form-data">
+          <div class="form-group">
+            <label class="form-label">Testo/Note</label>
+            <textarea name="proof_text" class="form-control" rows="3"></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Carica Immagine</label>
+            <input type="file" name="proof_image" class="form-control" accept="image/*">
+          </div>
+          <button type="submit" class="btn btn-primary">Invia per verifica</button>
+        </form>
+      {{/if}}
+      {{#if (eq completion.status 'rifiutata')}}
+        <div class="alert alert-error mt-3">
+          <strong>Motivo Rifiuto:</strong> {{completion.feedback}}
+        </div>
+        <form action="/completions/missions/{{mission.id}}/submit" method="POST" enctype="multipart/form-data" class="mt-3">
+          <div class="form-group">
+            <label class="form-label">Testo/Note</label>
+            <textarea name="proof_text" class="form-control" rows="3"></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Carica Immagine</label>
+            <input type="file" name="proof_image" class="form-control" accept="image/*">
+          </div>
+          <button type="submit" class="btn btn-primary">Invia nuova prova</button>
+        </form>
+      {{/if}}
+    {{else}}
+      {{#if (eq user.role 'user')}}
+      <form action="/completions/missions/{{mission.id}}/accept" method="POST">
+        <button type="submit" class="btn btn-primary">Accetta Missione</button>
+      </form>
+      {{/if}}
+    {{/if}}
+  {{else}}
+    <div class="alert alert-info">
+      Devi <a href="/auth/login" style="color: inherit; text-decoration: underline;">accedere</a> per accettare questa missione.
+    </div>
+  {{/if}}
+</div>

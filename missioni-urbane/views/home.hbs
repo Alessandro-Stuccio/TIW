@@ -1,0 +1,48 @@
+<h1 class="mb-3 text-green">In campo questa settimana</h1>
+
+<div id="map-container" style="width: 100%; height: 400px; margin-bottom: 30px; background: var(--bg-elevated); border: 1px solid var(--border); display: none;"></div>
+
+<form method="GET" action="/" class="filters" style="display: flex; gap: 15px; margin-bottom: 30px; background: var(--bg-surface); padding: 15px; border: 1px solid var(--border); border-radius: 4px;">
+  <div class="filter-item" style="flex: 1;">
+    <label class="form-label">Categoria</label>
+    <select name="category" class="form-control" onchange="this.form.submit()">
+      <option value="">Tutte</option>
+      <option value="esplorazione" {{#if (eq category "esplorazione")}}selected{{/if}}>Esplorazione</option>
+      <option value="cultura" {{#if (eq category "cultura")}}selected{{/if}}>Cultura</option>
+      <option value="fotografia" {{#if (eq category "fotografia")}}selected{{/if}}>Fotografia</option>
+      <option value="assurdità" {{#if (eq category "assurdità")}}selected{{/if}}>Assurdità</option>
+      <option value="utilità" {{#if (eq category "utilità")}}selected{{/if}}>Utilità</option>
+    </select>
+  </div>
+  <div class="filter-item" style="flex: 1;">
+    <label class="form-label">Difficoltà</label>
+    <select name="difficulty" class="form-control" onchange="this.form.submit()">
+      <option value="">Tutte</option>
+      <option value="facile" {{#if (eq difficulty "facile")}}selected{{/if}}>Facile</option>
+      <option value="media" {{#if (eq difficulty "media")}}selected{{/if}}>Media</option>
+      <option value="difficile" {{#if (eq difficulty "difficile")}}selected{{/if}}>Difficile</option>
+    </select>
+  </div>
+</form>
+
+<div class="grid grid-3">
+  {{#each missions}}
+  <div class="card {{#if @first}}card-featured{{/if}}">
+    {{#if @first}}<div class="ordinal-bg">01</div>{{/if}}
+    <h3 class="card-title">{{title}}</h3>
+    <div class="mb-2">
+      <span class="tag tag-{{difficulty}}">{{difficulty}}</span>
+      <span class="tag">{{category}}</span>
+    </div>
+    <p class="card-body mb-3">{{description}}</p>
+    <div class="mb-2" style="font-size: 0.85rem; color: var(--accent-amber);">
+      Punti: {{points}} | {{location}}
+    </div>
+    <a href="/missions/{{id}}" class="btn btn-primary btn-block">Vedi missione &rarr;</a>
+  </div>
+  {{else}}
+  <p class="text-muted">Nessuna missione trovata con questi filtri.</p>
+  {{/each}}
+</div>
+
+<script type="module" src="/js/map.js"></script>
