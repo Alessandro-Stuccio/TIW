@@ -5,6 +5,16 @@ import { requireAuth } from '../middleware/auth.js';
 
 const router = express.Router();
 
+// GET /users/leaderboard/data  → JSON per AJAX
+router.get('/leaderboard/data', (req, res) => {
+  try {
+    const leaderboard = getLeaderboard(50);
+    res.json(leaderboard);
+  } catch (err) {
+    res.status(500).json({ error: 'Errore server' });
+  }
+});
+
 router.get('/leaderboard', (req, res) => {
   try {
     const leaderboard = getLeaderboard(50);

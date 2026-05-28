@@ -7,7 +7,7 @@ const router = express.Router();
 
 // POST /completions/missions/:missionId/accept
 router.post('/missions/:missionId/accept', requireAuth, (req, res) => {
-  if (['admin', 'moderator'].includes(req.session.userRole)) {
+  if (['admin', 'moderator'].includes(req.session.role)) {
     return res.redirect(`/missions/${req.params.missionId}`); 
   }
 

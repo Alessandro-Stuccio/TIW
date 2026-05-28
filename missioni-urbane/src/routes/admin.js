@@ -14,12 +14,46 @@ router.get('/create-mission', requireAdmin, (req, res) => {
 });
 
 router.post('/create-mission', requireAdmin, (req, res) => {
+  const { title, description, location, lat, lng, points, difficulty, category } = req.body;
+  const errors = [];
+
+  if (!title || title.trim().length < 3)
+    errors.push('Il titolo deve avere almeno 3 caratteri.');
+  if (!description || description.trim().length < 10)
+    errors.push('La descrizione deve avere almeno 10 caratteri.');
+  if (!location || location.trim().length < 2)
+    errors.push('Il luogo è obbligatorio.');
+  const pts = parseInt(points, 10);
+  if (isNaN(pts) || pts <= 0)
+    errors.push('I punti devono essere un numero positivo.');
+  if (lat && (isNaN(parseFloat(lat)) || parseFloat(lat) < -90 || parseFloat(lat) > 90))
+    errors.push('Latitudine non valida (deve essere tra -90 e 90).');
+  if (lng && (isNaN(parseFloat(lng)) || parseFloat(lng) < -180 || parseFloat(lng) > 180))
+    errors.push('Longitudine non valida (deve essere tra -180 e 180).');
+
+  const validDifficulties = ['facile', 'medio', 'difficile'];
+  if (!validDifficulties.includes(difficulty))
+    errors.push('Difficoltà non valida.');
+
+  const validCategories = ['esplorazione', 'cultura', 'fotografia', 'utilità', 'assurdità controllata'];
+  if (!validCategories.includes(category))
+    errors.push('Categoria non valida.');
+
+  if (errors.length > 0) {
+    return res.render('admin/create-mission', { errors, formData: req.body });
+  }
+
   try {
-    createMission({...req.body, created_by: req.session.userId});
+    createMission({
+      title: title.trim(), description: description.trim(),
+      location: location.trim(), lat: lat || null, lng: lng || null,
+      points: pts, difficulty, category,
+      created_by: req.session.userId
+    });
     res.redirect('/admin');
   } catch (err) {
-    console.error("Errore creazione missione:", err);
-    res.redirect('/admin');
+    console.error('Errore creazione missione:', err);
+    res.render('admin/create-mission', { errors: ['Errore interno del server.'], formData: req.body });
   }
 });
 

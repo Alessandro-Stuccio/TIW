@@ -1,22 +1,30 @@
 <a href="/" class="btn btn-outline mb-3">&larr; Torna alle missioni</a>
 <h1 class="mb-3 text-green text-center">Classifica Agenti</h1>
-<div class="card mx-auto" style="max-width: 600px;">
-  <table class="table" style="width: 100%; text-align: left; border-collapse: collapse;">
+
+<div id="update-indicator" style="display:none; text-align:center; margin-bottom:10px;">
+  <span class="tag tag-facile">⚡ Classifica aggiornata!</span>
+</div>
+
+<div class="card mx-auto" style="max-width:600px;">
+  <table class="table" style="width:100%; text-align:left; border-collapse:collapse;">
     <thead>
-      <tr style="border-bottom: 1px solid var(--border);">
-        <th style="padding: 10px;">Posizione</th>
-        <th style="padding: 10px;">Nome in codice</th>
-        <th style="padding: 10px;">Punti Reputazione</th>
+      <tr style="border-bottom:1px solid var(--border);">
+        <th style="padding:10px;">Posizione</th>
+        <th style="padding:10px;">Nome in codice</th>
+        <th style="padding:10px;">Punti Reputazione</th>
       </tr>
     </thead>
-    <tbody>
+    <tbody id="leaderboard-body">
       {{#each leaderboard}}
-      <tr style="border-bottom: 1px solid var(--border);">
-        <td style="padding: 10px;">#{{@index}}</td>
-        <td style="padding: 10px;">{{username}}</td>
-        <td style="padding: 10px; color: var(--accent-amber); font-weight: bold;">{{points}}</td>
+      <tr style="border-bottom:1px solid var(--border);">
+        <td style="padding:10px;">#{{@index}}</td>
+        <td style="padding:10px;">{{username}}</td>
+        <td style="padding:10px; color:var(--accent-amber); font-weight:bold;">{{points}} PT</td>
       </tr>
       {{/each}}
     </tbody>
   </table>
 </div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="/js/leaderboard.js"></script>
