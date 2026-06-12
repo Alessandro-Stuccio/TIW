@@ -41,6 +41,18 @@
   box-shadow: 0 0 15px rgba(255, 51, 85, 0.4);
 }
 
+.btn-outline {
+  background: transparent;
+  color: var(--text-muted);
+  border-color: var(--border);
+}
+
+.btn-outline:hover {
+  color: var(--accent-green);
+  border-color: var(--accent-green);
+  background: rgba(0, 255, 136, 0.05);
+}
+
 .btn-block {
   display: block;
   width: 100%;
@@ -184,9 +196,16 @@ textarea.form-control {
   border-radius: 2px;
 }
 
+/* Tag difficoltà */
 .tag-facile { color: var(--accent-green); border-color: var(--accent-green); }
-.tag-media { color: var(--accent-amber); border-color: var(--accent-amber); }
+.tag-medio { color: var(--accent-amber); border-color: var(--accent-amber); }
 .tag-difficile { color: var(--accent-red); border-color: var(--accent-red); }
+
+/* Tag stato completamento */
+.tag-completata { color: var(--accent-green); border-color: var(--accent-green); }
+.tag-in_attesa { color: var(--accent-amber); border-color: var(--accent-amber); }
+.tag-rifiutata { color: var(--accent-red); border-color: var(--accent-red); }
+.tag-accettata { color: var(--text-primary); border-color: var(--text-muted); }
 
 /* Grid */
 .grid {
@@ -234,15 +253,21 @@ textarea.form-control {
 }
 
 .alert-error {
-  background: #fef2f2;
-  color: #7f1d1d;
-  border-left: 3px solid #c0392b;
+  background: rgba(255, 51, 85, 0.1);
+  color: var(--accent-red);
+  border-left: 3px solid var(--accent-red);
 }
 
 .alert-success {
-  background: #f0f7f4;
-  color: #2d6a4f;
-  border-left: 3px solid #2d6a4f;
+  background: rgba(0, 255, 136, 0.1);
+  color: var(--accent-green);
+  border-left: 3px solid var(--accent-green);
+}
+
+.alert-info {
+  background: rgba(94, 168, 255, 0.1);
+  color: #5ea8ff;
+  border-left: 3px solid #5ea8ff;
 }
 
 /* Responsive Table Wrapper */

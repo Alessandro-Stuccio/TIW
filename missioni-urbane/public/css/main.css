@@ -125,6 +125,8 @@ footer {
 .text-green { color: var(--accent-green); }
 .text-amber { color: var(--accent-amber); }
 .text-red { color: var(--accent-red); }
+.text-muted { color: var(--text-muted); }
+.text-center { text-align: center; }
 
 .mb-1 { margin-bottom: 10px; }
 .mb-2 { margin-bottom: 20px; }
@@ -133,6 +135,10 @@ footer {
 
 .mt-1 { margin-top: 10px; }
 .mt-2 { margin-top: 20px; }
+.mt-3 { margin-top: 30px; }
+.mt-4 { margin-top: 40px; }
+
+.mx-auto { margin-left: auto; margin-right: auto; }
 
 .hidden { display: none !important; }
 
