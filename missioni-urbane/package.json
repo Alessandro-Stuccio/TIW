@@ -7,15 +7,19 @@
     "dev": "node --watch src/server.js",
     "seed": "node src/db/seed.js"
   },
+  "overrides": {
+    "tar": "^7.5.11",
+    "@tootallnate/once": "^2.0.1"
+  },
   "dependencies": {
-    "bcrypt": "^5.1.1",
+    "bcrypt": "^6.0.0",
     "better-sqlite3": "^12.10.0",
     "connect-sqlite3": "^0.9.15",
     "dotenv": "^16.4.5",
     "express": "^5.0.1",
     "express-handlebars": "^8.0.3",
     "express-session": "^1.18.0",
-    "multer": "^1.4.5-lts.1",
+    "multer": "^2.1.1",
     "socket.io": "^4.7.5"
   }
 }

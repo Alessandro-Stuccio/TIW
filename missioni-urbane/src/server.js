@@ -36,17 +36,16 @@ app.engine('hbs', engine({
   defaultLayout: 'main',
   partialsDir: path.join(__dirname, '../views/partials'),
   helpers: {
-    eq: (a, b) => a === b
+    eq: (a, b) => a === b,
+    inc: (n) => n + 1
   }
 }));
 app.set('view engine', 'hbs');
 app.set('views', path.join(__dirname, '../views'));
 
 // Configurazione di Socket.io per le funzionalità in tempo reale (es. aggiornamento classifica).
-// Lo leghiamo al server HTTP nativo.
-const io = new Server(httpServer, {
-  cors: { origin: '*' }
-});
+// Lo leghiamo al server HTTP nativo. Niente CORS: i client sono serviti dalla stessa origine.
+const io = new Server(httpServer);
 // Salviamo l'istanza di 'io' nell'app Express così da poterla usare all'interno delle rotte (es. dopo l'approvazione di una prova).
 app.set('io', io);
 

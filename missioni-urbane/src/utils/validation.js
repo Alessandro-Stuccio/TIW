@@ -1,7 +1,7 @@
 // Modulo di utility per la validazione dei dati delle missioni.
 // Disaccoppia la logica di controllo dalle rotte (admin.js) rendendola riutilizzabile.
 export const validateMissionInput = (body) => {
-  const { title, description, location, lat, lng, points, difficulty, category } = body;
+  const { title, description, location, lat, lng, points, difficulty, category, status } = body;
   const errors = [];
 
   // Controlli di base sui campi di testo
@@ -28,6 +28,11 @@ export const validateMissionInput = (body) => {
   const validCategories = ['esplorazione', 'cultura', 'fotografia', 'utilità', 'assurdità controllata'];
   if (!validCategories.includes(category))
     errors.push('Categoria non valida.');
+
+  // Lo status è presente solo nel form di modifica; se inviato deve essere uno dei valori previsti
+  const validStatuses = ['attiva', 'archiviata'];
+  if (status !== undefined && !validStatuses.includes(status))
+    errors.push('Stato non valido.');
 
   // Restituisce un oggetto con l'array degli eventuali errori (da mostrare all'utente) e i dati originari processati
   return { errors, data: body };

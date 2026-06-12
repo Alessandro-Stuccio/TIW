@@ -23,13 +23,24 @@ function renderLeaderboard(data) {
     tbody.innerHTML = '<tr><td colspan="3" class="text-center text-muted">Nessun agente.</td></tr>';
     return;
   }
-  tbody.innerHTML = data.map((user, i) => `
-    <tr>
-      <td style="padding:10px;">#${i + 1}</td>
-      <td style="padding:10px;">${user.username}</td>
-      <td style="padding:10px; color:var(--accent-amber); font-weight:bold;">${user.points} PT</td>
-    </tr>
-  `).join('');
+  // Costruiamo le righe via DOM e textContent: lo username è input utente
+  // e non deve mai essere interpretato come HTML.
+  tbody.innerHTML = '';
+  data.forEach((user, i) => {
+    const tr = document.createElement('tr');
+    const cells = [`#${i + 1}`, user.username, `${user.points} PT`];
+    cells.forEach((text, col) => {
+      const td = document.createElement('td');
+      td.style.padding = '10px';
+      if (col === 2) {
+        td.style.color = 'var(--accent-amber)';
+        td.style.fontWeight = 'bold';
+      }
+      td.textContent = text;
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
 }
 
 function setupSocket() {

@@ -29,7 +29,19 @@ async function loadMap() {
             popupAnchor: [0, -15]
           });
           const marker = L.marker([m.lat, m.lng], { icon: customMarker }).addTo(map);
-          marker.bindPopup(`<b>${m.title}</b><br>${m.points} pt<br><a href="/missions/${m.id}">Vedi</a>`);
+          // Popup costruito via DOM: il titolo non deve essere interpretato come HTML
+          const popup = document.createElement('div');
+          const titleEl = document.createElement('b');
+          titleEl.textContent = m.title;
+          const link = document.createElement('a');
+          link.href = `/missions/${m.id}`;
+          link.textContent = 'Vedi';
+          popup.appendChild(titleEl);
+          popup.appendChild(document.createElement('br'));
+          popup.appendChild(document.createTextNode(`${m.points} pt`));
+          popup.appendChild(document.createElement('br'));
+          popup.appendChild(link);
+          marker.bindPopup(popup);
           bounds.extend([m.lat, m.lng]);
         }
       });

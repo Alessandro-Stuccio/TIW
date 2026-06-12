@@ -1,9 +1,8 @@
 // Router che gestisce la fruizione pubblica delle missioni da parte degli utenti.
 // Attenzione: la rotta GET '/' è dichiarata globalmente in server.js per gestire l'homepage.
 import express from 'express';
-import { getAll, getById, create, update, archive } from '../repositories/missions.repo.js';
-import { requireAdmin } from '../middleware/auth.js';
-import db from '../db/database.js'; 
+import { getAll, getById } from '../repositories/missions.repo.js';
+import db from '../db/database.js';
 
 const router = express.Router();
 

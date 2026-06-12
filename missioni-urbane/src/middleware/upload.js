@@ -20,13 +20,17 @@ const storage = multer.diskStorage({
   }
 });
 
-// Filtro di sicurezza: 
-// Accettiamo esclusivamente file il cui MIME type inizia per 'image/'.
+// Filtro di sicurezza:
+// Il MIME type è dichiarato dal client e non è affidabile da solo: controlliamo
+// anche l'estensione del file originale (che viene riusata per il salvataggio),
+// altrimenti un file .html spacciato per immagine verrebbe servito come HTML da /uploads.
+const ALLOWED_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
 const fileFilter = (req, file, cb) => {
-  if (file.mimetype.startsWith('image/')) {
+  const ext = path.extname(file.originalname).toLowerCase();
+  if (file.mimetype.startsWith('image/') && ALLOWED_EXTENSIONS.includes(ext)) {
     cb(null, true);
   } else {
-    cb(new Error('Solo le immagini sono permesse!'), false);
+    cb(new Error('Solo le immagini sono permesse (jpg, jpeg, png, gif, webp)!'), false);
   }
 };
 

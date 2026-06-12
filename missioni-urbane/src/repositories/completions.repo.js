@@ -28,9 +28,10 @@ export const submitProof = (userId, missionId, proofText, proofImage) => {
 // se fallisce l'assegnazione dei punti, l'intera approvazione viene scartata (rollback).
 export const verifyCompletion = (completionId, verifiedByUserId) => {
   const verifyTx = db.transaction(() => {
-    // Prima si recupera il completamento e si verifica che non sia già completato.
+    // Si può approvare solo una prova effettivamente inviata e in attesa di verifica:
+    // un completamento solo 'accettata' non ha prova e non deve assegnare punti.
     const comp = db.prepare('SELECT * FROM completions WHERE id = ?').get(completionId);
-    if (!comp || comp.status === 'completata') return false;
+    if (!comp || comp.status !== 'in_attesa') return false;
     
     const mission = db.prepare('SELECT points FROM missions WHERE id = ?').get(comp.mission_id);
 

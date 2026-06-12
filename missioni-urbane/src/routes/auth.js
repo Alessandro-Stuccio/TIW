@@ -39,13 +39,18 @@ router.post('/register', async (req, res) => {
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
     const userId = createUser(username, email, hashedPassword);
-    
-    // Auto login
-    req.session.userId = userId;
-    req.session.role = 'user';
-    req.session.username = username;
-    
-    res.redirect('/');
+
+    // Auto login: rigeneriamo il session ID per prevenire session fixation
+    req.session.regenerate((err) => {
+      if (err) {
+        console.error("Errore rigenerazione sessione:", err);
+        return res.render('auth/register', { error: 'Errore interno del server', username, email });
+      }
+      req.session.userId = userId;
+      req.session.role = 'user';
+      req.session.username = username;
+      res.redirect('/');
+    });
   } catch (err) {
     console.error("Errore nel POST /auth/register:", err);
     if (err.message.includes('UNIQUE constraint failed')) {
@@ -86,13 +91,19 @@ router.post('/login', async (req, res) => {
     }
     
     // Setup session
-    // Salvataggio dei dati utente essenziali in sessione.
-    // express-session serializzerà questi dati nel database SQLite configurato in server.js
-    req.session.userId = user.id;
-    req.session.role = user.role;
-    req.session.username = user.username;
-    
-    res.redirect('/');
+    // Rigeneriamo il session ID al login (prevenzione session fixation), poi
+    // salviamo i dati utente essenziali: express-session li serializzerà
+    // nel database SQLite configurato in server.js
+    req.session.regenerate((err) => {
+      if (err) {
+        console.error("Errore rigenerazione sessione:", err);
+        return res.render('auth/login', { error: 'Errore interno del server', email });
+      }
+      req.session.userId = user.id;
+      req.session.role = user.role;
+      req.session.username = user.username;
+      res.redirect('/');
+    });
   } catch (err) {
     console.error("Errore nel POST /auth/login:", err);
     res.render('auth/login', { error: 'Errore interno del server', email });
