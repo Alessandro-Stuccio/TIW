@@ -1,0 +1,67 @@
+{{#if errors}}
+  <div class="alert alert-error mb-3">
+    <ul style="margin:0; padding-left:18px;">
+      {{#each errors}}<li>{{this}}</li>{{/each}}
+    </ul>
+  </div>
+{{/if}}
+
+<div class="form-group">
+  <label class="form-label">Titolo Missione</label>
+  <input type="text" name="title" class="form-control" value="{{formData.title}}" required>
+</div>
+
+<div class="form-group">
+  <label class="form-label">Descrizione</label>
+  <textarea name="description" class="form-control" rows="4" required>{{formData.description}}</textarea>
+</div>
+
+<div class="form-group">
+  <label class="form-label">Ricompensa (Punti)</label>
+  <input type="number" name="points" class="form-control" value="{{#if formData.points}}{{formData.points}}{{else}}10{{/if}}" required>
+</div>
+
+<div class="form-group">
+  <label class="form-label">Difficoltà</label>
+  <select name="difficulty" class="form-control">
+    <option value="facile" {{#if (eq formData.difficulty 'facile')}}selected{{/if}}>Facile</option>
+    <option value="medio" {{#if (eq formData.difficulty 'medio')}}selected{{/if}}>Medio</option>
+    <option value="difficile" {{#if (eq formData.difficulty 'difficile')}}selected{{/if}}>Difficile</option>
+  </select>
+</div>
+
+<div class="form-group">
+  <label class="form-label">Categoria</label>
+  <select name="category" class="form-control">
+    <option value="esplorazione" {{#if (eq formData.category 'esplorazione')}}selected{{/if}}>Esplorazione</option>
+    <option value="cultura" {{#if (eq formData.category 'cultura')}}selected{{/if}}>Cultura</option>
+    <option value="fotografia" {{#if (eq formData.category 'fotografia')}}selected{{/if}}>Fotografia</option>
+    <option value="utilità" {{#if (eq formData.category 'utilità')}}selected{{/if}}>Utilità</option>
+    <option value="assurdità controllata" {{#if (eq formData.category 'assurdità controllata')}}selected{{/if}}>Assurdità controllata</option>
+  </select>
+</div>
+
+<div class="form-group">
+  <label class="form-label">Latitudine (Opzionale per Mappa)</label>
+  <input type="number" step="any" name="lat" class="form-control" value="{{formData.lat}}">
+</div>
+
+<div class="form-group">
+  <label class="form-label">Longitudine (Opzionale per Mappa)</label>
+  <input type="number" step="any" name="lng" class="form-control" value="{{formData.lng}}">
+</div>
+
+<div class="form-group">
+  <label class="form-label">Location (Testo)</label>
+  <input type="text" name="location" class="form-control" value="{{formData.location}}" required>
+</div>
+
+{{#if editMode}}
+<div class="form-group">
+  <label class="form-label">Stato Missione</label>
+  <select name="status" class="form-control">
+    <option value="attiva" {{#if (eq formData.status 'attiva')}}selected{{/if}}>Attiva</option>
+    <option value="archiviata" {{#if (eq formData.status 'archiviata')}}selected{{/if}}>Archiviata</option>
+  </select>
+</div>
+{{/if}}

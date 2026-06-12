@@ -1,5 +1,9 @@
+// Data Access Object (DAO) per le missioni.
+// Centralizza tutte le operazioni CRUD (Create, Read, Update, Delete/Archive) per la tabella 'missions'.
 import db from '../db/database.js';
 
+// Recupera tutte le missioni 'attive' dal database.
+// Se vengono forniti categoria e/o difficoltà, la query SQL viene costruita dinamicamente per filtrare i risultati.
 export const getAll = (category, difficulty) => {
   let query = "SELECT * FROM missions WHERE status = 'attiva'";
   const params = [];
@@ -18,10 +22,12 @@ export const getAll = (category, difficulty) => {
   return db.prepare(query).all(...params);
 };
 
+// Recupera una specifica missione tramite il suo ID (Primary Key).
 export const getById = (id) => {
   return db.prepare('SELECT * FROM missions WHERE id = ?').get(id);
 };
 
+// Inserisce una nuova missione nel database e ne restituisce l'ID.
 export const create = (missionData) => {
   const { title, description, location, lat, lng, points, difficulty, category, created_by } = missionData;
   const result = db.prepare(`

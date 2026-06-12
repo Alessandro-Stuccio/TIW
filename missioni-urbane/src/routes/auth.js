@@ -1,4 +1,6 @@
 import express from 'express';
+// Router dedicato all'autenticazione.
+// Gestisce registrazione, login e logout degli utenti.
 import bcrypt from 'bcrypt';
 import { findByEmail, createUser } from '../repositories/users.repo.js';
 
@@ -11,6 +13,9 @@ router.get('/register', (req, res) => {
 });
 
 // POST /auth/register
+// POST /auth/register
+// Elabora il form di registrazione. 
+// Validiamo l'input (lunghezza password, formato email) e tentiamo la creazione sul DB.
 router.post('/register', async (req, res) => {
   const { username, email, password } = req.body;
   
@@ -57,6 +62,9 @@ router.get('/login', (req, res) => {
 });
 
 // POST /auth/login
+// POST /auth/login
+// Verifica le credenziali confrontando l'hash della password (tramite users.repo.js).
+// In caso di successo, inizializza la sessione.
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
   
@@ -78,6 +86,8 @@ router.post('/login', async (req, res) => {
     }
     
     // Setup session
+    // Salvataggio dei dati utente essenziali in sessione.
+    // express-session serializzerà questi dati nel database SQLite configurato in server.js
     req.session.userId = user.id;
     req.session.role = user.role;
     req.session.username = user.username;
@@ -90,6 +100,8 @@ router.post('/login', async (req, res) => {
 });
 
 // POST /auth/logout
+// POST /auth/logout
+// Distrugge la sessione attiva e rimuove i cookie collegati, disconnettendo l'utente.
 router.post('/logout', (req, res) => {
   req.session.destroy(err => {
     if (err) {

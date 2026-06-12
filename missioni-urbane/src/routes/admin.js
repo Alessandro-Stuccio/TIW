@@ -1,91 +1,108 @@
+// Router dedicato esclusivamente alle operazioni amministrative (Admin HQ).
+// Qui si concentrano creazione, modifica e archiviazione delle missioni.
 import express from 'express';
-import { requireAdmin, requireModerator } from '../middleware/auth.js';
-import { create as createMission } from '../repositories/missions.repo.js';
-import { getPending, verifyCompletion, rejectCompletion } from '../repositories/completions.repo.js';
+import { requireAdmin } from '../middleware/auth.js';
+import { create as createMission, getAll, getById, update as updateMission, archive as archiveMission } from '../repositories/missions.repo.js';
+import { validateMissionInput } from '../utils/validation.js';
+import db from '../db/database.js';
 
 const router = express.Router();
 
+// Mostra la dashboard principale del pannello HQ
 router.get('/', requireAdmin, (req, res) => {
   res.render('admin/dashboard');
 });
 
+// Mostra il form vuoto per la creazione di una nuova missione
 router.get('/create-mission', requireAdmin, (req, res) => {
   res.render('admin/create-mission');
 });
 
+// Gestisce la ricezione dei dati del form di creazione
 router.post('/create-mission', requireAdmin, (req, res) => {
-  const { title, description, location, lat, lng, points, difficulty, category } = req.body;
-  const errors = [];
-
-  if (!title || title.trim().length < 3)
-    errors.push('Il titolo deve avere almeno 3 caratteri.');
-  if (!description || description.trim().length < 10)
-    errors.push('La descrizione deve avere almeno 10 caratteri.');
-  if (!location || location.trim().length < 2)
-    errors.push('Il luogo è obbligatorio.');
-  const pts = parseInt(points, 10);
-  if (isNaN(pts) || pts <= 0)
-    errors.push('I punti devono essere un numero positivo.');
-  if (lat && (isNaN(parseFloat(lat)) || parseFloat(lat) < -90 || parseFloat(lat) > 90))
-    errors.push('Latitudine non valida (deve essere tra -90 e 90).');
-  if (lng && (isNaN(parseFloat(lng)) || parseFloat(lng) < -180 || parseFloat(lng) > 180))
-    errors.push('Longitudine non valida (deve essere tra -180 e 180).');
-
-  const validDifficulties = ['facile', 'medio', 'difficile'];
-  if (!validDifficulties.includes(difficulty))
-    errors.push('Difficoltà non valida.');
-
-  const validCategories = ['esplorazione', 'cultura', 'fotografia', 'utilità', 'assurdità controllata'];
-  if (!validCategories.includes(category))
-    errors.push('Categoria non valida.');
+  // Prima di scrivere a database, effettuiamo una validazione robusta dei campi.
+  // Utilizziamo un modulo utility esterno per mantenere pulito il controller.
+  const { errors, data } = validateMissionInput(req.body);
 
   if (errors.length > 0) {
-    return res.render('admin/create-mission', { errors, formData: req.body });
+    // Se ci sono errori, re-renderizziamo il form ripopolandolo con i dati appena inviati (formData) e mostrando la lista degli errori.
+    return res.render('admin/create-mission', { errors, formData: data });
   }
 
   try {
+    const pts = parseInt(data.points, 10);
     createMission({
-      title: title.trim(), description: description.trim(),
-      location: location.trim(), lat: lat || null, lng: lng || null,
-      points: pts, difficulty, category,
+      title: data.title.trim(), description: data.description.trim(),
+      location: data.location.trim(), lat: data.lat || null, lng: data.lng || null,
+      points: pts, difficulty: data.difficulty, category: data.category,
       created_by: req.session.userId
     });
-    res.redirect('/admin');
+    res.redirect('/admin/missions');
   } catch (err) {
     console.error('Errore creazione missione:', err);
-    res.render('admin/create-mission', { errors: ['Errore interno del server.'], formData: req.body });
+    res.render('admin/create-mission', { errors: ['Errore interno del server.'], formData: data });
   }
 });
 
-router.get('/verify-proofs', requireModerator, (req, res) => {
+// Elenca tutte le missioni (comprese le archiviate) per la gestione da parte dell'admin
+router.get('/missions', requireAdmin, (req, res) => {
   try {
-    const pendings = getPending();
-    res.render('admin/verify-proofs', { pendings });
+    // A differenza di 'getAll' generico, qui eseguiamo una query diretta che ignora lo stato 'attiva'.
+    const missions = db.prepare('SELECT * FROM missions ORDER BY created_at DESC').all();
+    res.render('admin/missions-list', { missions });
   } catch (err) {
-    console.error("Errore pending proofs:", err);
+    console.error('Errore get missions:', err);
     res.redirect('/admin');
   }
 });
 
-router.post('/verify-proofs/:id/approve', requireModerator, (req, res) => {
+// Mostra il form per la modifica di una missione esistente
+router.get('/missions/:id/edit', requireAdmin, (req, res) => {
   try {
-    verifyCompletion(req.params.id, req.session.userId);
-    const io = req.app.get('io');
-    if (io) io.emit('leaderboard_update', { message: 'Classifica aggiornata' });
-    res.redirect('/admin/verify-proofs');
+    const mission = getById(req.params.id);
+    if (!mission) {
+      return res.redirect('/admin/missions');
+    }
+    // Passiamo la missione come `formData` così il partial Handlebars _mission-form la pre-compilerà
+    res.render('admin/edit-mission', { formData: mission });
   } catch (err) {
-    console.error("Errore verify:", err);
-    res.redirect('/admin/verify-proofs');
+    console.error('Errore get edit mission:', err);
+    res.redirect('/admin/missions');
   }
 });
 
-router.post('/verify-proofs/:id/reject', requireModerator, (req, res) => {
+// Processa l'update dei campi di una missione già esistente
+router.post('/missions/:id/update', requireAdmin, (req, res) => {
+  const { errors, data } = validateMissionInput(req.body);
+
+  if (errors.length > 0) {
+    data.id = req.params.id; // mantieni l'id per il form
+    return res.render('admin/edit-mission', { errors, formData: data });
+  }
+
   try {
-    rejectCompletion(req.params.id, req.body.feedback, req.session.userId);
-    res.redirect('/admin/verify-proofs');
+    const pts = parseInt(data.points, 10);
+    updateMission(req.params.id, {
+      title: data.title.trim(), description: data.description.trim(),
+      location: data.location.trim(), lat: data.lat || null, lng: data.lng || null,
+      points: pts, difficulty: data.difficulty, category: data.category,
+      status: req.body.status || 'attiva' // Assumi attiva o recupera dal body
+    });
+    res.redirect('/admin/missions');
   } catch (err) {
-    console.error("Errore reject:", err);
-    res.redirect('/admin/verify-proofs');
+    console.error('Errore update missione:', err);
+    data.id = req.params.id;
+    res.render('admin/edit-mission', { errors: ['Errore interno del server.'], formData: data });
+  }
+});
+
+router.post('/missions/:id/archive', requireAdmin, (req, res) => {
+  try {
+    archiveMission(req.params.id);
+    res.redirect('/admin/missions');
+  } catch (err) {
+    console.error("Errore archive:", err);
+    res.redirect('/admin/missions');
   }
 });
 

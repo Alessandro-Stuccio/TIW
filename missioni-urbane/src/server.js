@@ -1,3 +1,5 @@
+// Punto di ingresso principale dell'applicazione.
+// Qui configuriamo Express, il server HTTP, Socket.io per il real-time e tutte le rotte.
 import express from 'express';
 import session from 'express-session';
 import SQLiteStoreFactory from 'connect-sqlite3';
@@ -26,7 +28,9 @@ import adminRoutes from './routes/admin.js';
 const app = express();
 const httpServer = createServer(app);
 
-// Configura Handlebars per SSR
+// Configurazione del motore di template (Handlebars).
+// Utilizziamo Handlebars per il Server-Side Rendering (SSR).
+// Abbiamo definito un helper personalizzato `eq` per fare confronti diretti nei template (es. per verificare i ruoli).
 app.engine('hbs', engine({ 
   extname: '.hbs', 
   defaultLayout: 'main',
@@ -38,10 +42,12 @@ app.engine('hbs', engine({
 app.set('view engine', 'hbs');
 app.set('views', path.join(__dirname, '../views'));
 
-// Configura Socket.io
+// Configurazione di Socket.io per le funzionalità in tempo reale (es. aggiornamento classifica).
+// Lo leghiamo al server HTTP nativo.
 const io = new Server(httpServer, {
   cors: { origin: '*' }
 });
+// Salviamo l'istanza di 'io' nell'app Express così da poterla usare all'interno delle rotte (es. dopo l'approvazione di una prova).
 app.set('io', io);
 
 io.on('connection', (socket) => {
@@ -60,7 +66,8 @@ app.use('/favicon.ico', (req, res) => res.status(204).end());
 app.use(express.static(path.join(__dirname, '../public')));
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
-// Configura Sessioni
+// Gestione delle sessioni persistenti.
+// Usiamo SQLite come store per le sessioni in modo che i login non vadano persi al riavvio del server.
 const SQLiteStore = SQLiteStoreFactory(session);
 app.use(session({
   store: new SQLiteStore({
@@ -77,7 +84,8 @@ app.use(session({
   }
 }));
 
-// Middleware globale per i dati utente nelle viste
+// Middleware globale: rende i dati dell'utente loggato sempre disponibili in ogni template Handlebars.
+// Se l'utente è in sessione, passiamo le sue info di base (id, ruolo, username) a 'res.locals.user'.
 app.use((req, res, next) => {
   res.locals.user = req.session.userId ? { 
     id: req.session.userId, 
@@ -87,7 +95,8 @@ app.use((req, res, next) => {
   next();
 });
 
-// Home Page SSR
+// Rotta Home Page: Carica la lista delle missioni attive.
+// Supporta anche il filtraggio tramite query string (categoria e difficoltà).
 app.get('/', (req, res) => {
   try {
     const { category, difficulty } = req.query;
@@ -99,7 +108,8 @@ app.get('/', (req, res) => {
   }
 });
 
-// SSR Routes
+// Registrazione di tutti i moduli di routing.
+// Ogni modulo gestisce un prefisso specifico dell'URL.
 app.use('/auth', authRoutes);
 app.use('/missions', missioniRoutes);
 app.use('/completions', completamentiRoutes);

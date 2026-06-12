@@ -1,12 +1,20 @@
+// Modulo responsabile della connessione al database SQLite.
+// Qui definiamo anche lo schema iniziale creando le tabelle se non esistono.
 import Database from 'better-sqlite3';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+// Connessione al file di database locale (missioni.db).
 const db = new Database(path.join(__dirname, 'missioni.db'));
+
+// Ottimizzazioni SQLite:
+// WAL mode migliora le performance di scrittura concorrente.
+// foreign_keys assicura l'integrità referenziale tra le tabelle.
 db.pragma('journal_mode = WAL');
 db.pragma('foreign_keys = ON');
 
+// Esecuzione dello script DDL per la creazione delle tabelle essenziali.
 db.exec(`
   CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,

@@ -1,9 +1,12 @@
+// Script eseguibile (tramite `npm run seed`) per riempire il database con dati di partenza.
+// Molto utile per resettare lo stato e fare testing o simulazioni.
 import db from './database.js';
 import bcrypt from 'bcrypt';
 
 const hash = (pwd) => bcrypt.hashSync(pwd, 10);
 
-// Utenti
+// Inserimento di 3 tipologie fondamentali di utenti (Admin, Moderatore, Utente standard).
+// Usiamo INSERT OR IGNORE per evitare che lanci in sequenza dello script duplichino i dati in caso i record esistano già.
 const admin = db.prepare(
   `INSERT OR IGNORE INTO users (username, email, password, role) VALUES (?, ?, ?, ?)`
 ).run('admin', 'admin@missioni.it', hash('admin123'), 'admin');
@@ -16,7 +19,7 @@ db.prepare(
   `INSERT OR IGNORE INTO users (username, email, password, role) VALUES (?, ?, ?, ?)`
 ).run('agente_mario', 'mario@missioni.it', hash('user123'), 'user');
 
-// Badge
+// Registrazione statica dei Badge sbloccabili (obiettivi del gioco)
 const badges = [
   ['Prima missione', 'Completa la tua prima missione', '🎯', 'first_mission'],
   ['Esploratore', 'Completa 5 missioni', '🗺️', '5_missions'],
@@ -28,10 +31,11 @@ for (const [name, description, icon, condition] of badges) {
   db.prepare(`INSERT OR IGNORE INTO badges (name, description, icon, condition) VALUES (?, ?, ?, ?)`).run(name, description, icon, condition);
 }
 
-// Recupera l'admin dal DB per usare il suo id come created_by
+// Abbiamo bisogno di un riferimento all'id dell'admin per associargli la creazione delle missioni sottostanti.
 const adminUser = db.prepare("SELECT id FROM users WHERE username = 'admin'").get();
 const adminId = adminUser.id;
 
+// Array strutturato di missioni di esempio dislocate sulla mappa e divise per categoria.
 const missioni = [
   {
     title: 'Fontanella Nascosta',

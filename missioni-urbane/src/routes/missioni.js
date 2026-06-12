@@ -1,3 +1,5 @@
+// Router che gestisce la fruizione pubblica delle missioni da parte degli utenti.
+// Attenzione: la rotta GET '/' è dichiarata globalmente in server.js per gestire l'homepage.
 import express from 'express';
 import { getAll, getById, create, update, archive } from '../repositories/missions.repo.js';
 import { requireAdmin } from '../middleware/auth.js';
@@ -5,7 +7,9 @@ import db from '../db/database.js';
 
 const router = express.Router();
 
-// L'endpoint GET / è in server.js per la home, ma qui c'è ancora l'endpoint map-data
+// GET /missions/api/map-data
+// Endpoint JSON dedicato alla fornitura di dati per Leaflet.js
+// Estrae e restituisce esclusivamente le missioni dotate di coordinate geografiche valide.
 router.get('/api/map-data', (req, res) => {
   try {
     const missions = getAll();
@@ -18,7 +22,10 @@ router.get('/api/map-data', (req, res) => {
   }
 });
 
-// GET /missions/:id -> Detail view
+// GET /missions/:id 
+// Mostra i dettagli di una specifica missione (titolo, descrizione, ecc.).
+// Valuta anche se l'utente loggato l'ha già accettata (tramite una query sul completamento)
+// per adattare l'interfaccia (mostrando il form di prova o il bottone di accetta).
 router.get('/:id', (req, res) => {
   try {
     const missionId = req.params.id;
@@ -38,38 +45,6 @@ router.get('/:id', (req, res) => {
   } catch (err) {
     console.error("Errore nel GET /:id:", err);
     res.render('missions/detail', { error: 'Errore nel recupero della missione' });
-  }
-});
-
-// Admin routes (POST / PUT / DELETE per missions)
-// POST /missions
-router.post('/', requireAdmin, (req, res) => {
-  try {
-    create({...req.body, created_by: req.session.userId});
-    res.redirect('/admin');
-  } catch (err) {
-    console.error("Errore nel POST /missions:", err);
-    res.redirect('/admin'); 
-  }
-});
-
-router.post('/:id/update', requireAdmin, (req, res) => {
-  try {
-    update(req.params.id, req.body);
-    res.redirect('/admin');
-  } catch (err) {
-    console.error("Errore update:", err);
-    res.redirect('/admin');
-  }
-});
-
-router.post('/:id/archive', requireAdmin, (req, res) => {
-  try {
-    archive(req.params.id);
-    res.redirect('/admin');
-  } catch (err) {
-    console.error("Errore archive:", err);
-    res.redirect('/admin');
   }
 });
 

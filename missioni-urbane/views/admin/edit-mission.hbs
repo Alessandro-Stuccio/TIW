@@ -1,0 +1,10 @@
+<a href="/admin/missions" class="btn btn-outline mb-3">&larr; Torna alle Missioni</a>
+
+<div class="card" style="max-width: 600px; margin: 0 auto;">
+  <h2 class="text-green mb-3">Modifica Missione</h2>
+  
+  <form action="/admin/missions/{{formData.id}}/update" method="POST">
+    {{> _mission-form editMode=true}}
+    <button type="submit" class="btn btn-primary btn-block">Salva Modifiche</button>
+  </form>
+</div>

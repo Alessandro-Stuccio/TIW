@@ -1,11 +1,18 @@
+// Router che gestisce tutto il ciclo di vita del completamento di una missione:
+// 1. Accettazione da parte dell'utente
+// 2. Invio della prova (submit)
+// 3. Verifica da parte dei moderatori (approvazione o rifiuto)
 import express from 'express';
 import { requireAuth, requireModerator } from '../middleware/auth.js';
 import { upload } from '../middleware/upload.js';
 import { acceptMission, submitProof, verifyCompletion, rejectCompletion, getPending, getById as getCompById } from '../repositories/completions.repo.js';
+import { getById as getMissionById } from '../repositories/missions.repo.js';
+import db from '../db/database.js';
 
 const router = express.Router();
 
 // POST /completions/missions/:missionId/accept
+// Permette ad un utente base di accettare una missione. Admin e Moderatori non possono accettarle per giocare.
 router.post('/missions/:missionId/accept', requireAuth, (req, res) => {
   if (['admin', 'moderator'].includes(req.session.role)) {
     return res.redirect(`/missions/${req.params.missionId}`); 
@@ -21,24 +28,46 @@ router.post('/missions/:missionId/accept', requireAuth, (req, res) => {
 });
 
 // POST /completions/missions/:missionId/submit
+// Questa rotta processa l'invio fisico della prova (testo e foto).
+// Usiamo il middleware 'upload.single' di Multer per intercettare eventuali immagini dal form-data.
 router.post('/missions/:missionId/submit', requireAuth, upload.single('proof_image'), (req, res) => {
   const { proof_text } = req.body;
   const proof_image = req.file ? `/uploads/proofs/${req.file.filename}` : null;
+  const missionId = req.params.missionId;
 
   if (!proof_text && !proof_image) {
-    return res.redirect(`/missions/${req.params.missionId}`);
+    // Validazione base: non si può inviare una prova completamente vuota
+    const mission = getMissionById(missionId);
+    const completion = db.prepare('SELECT * FROM completions WHERE user_id = ? AND mission_id = ?').get(req.session.userId, missionId);
+    return res.render('missions/detail', { 
+      mission, 
+      completion, 
+      error: 'Devi fornire un testo o un\'immagine come prova.' 
+    });
   }
 
   try {
-    submitProof(req.session.userId, req.params.missionId, proof_text, proof_image);
+    const changes = submitProof(req.session.userId, missionId, proof_text, proof_image);
+    
+    if (changes === 0) {
+      const mission = getMissionById(missionId);
+      const completion = db.prepare('SELECT * FROM completions WHERE user_id = ? AND mission_id = ?').get(req.session.userId, missionId);
+      return res.render('missions/detail', { 
+        mission, 
+        completion, 
+        error: 'Devi prima accettare la missione per poter inviare una prova, oppure la prova è già stata inviata.' 
+      });
+    }
+
     res.redirect(`/users/dashboard`);
   } catch (err) {
     console.error("Errore nell'invio della prova:", err);
-    res.redirect(`/missions/${req.params.missionId}`);
+    res.redirect(`/missions/${missionId}`);
   }
 });
 
-// Moderazione - GET /pending per vedere le prove
+// Moderazione - GET /pending
+// Pagina dove Moderatori e Admin possono ispezionare la coda delle prove non ancora verificate.
 router.get('/pending', requireModerator, (req, res) => {
   try {
     const pendings = getPending();
@@ -50,14 +79,19 @@ router.get('/pending', requireModerator, (req, res) => {
 });
 
 // POST /completions/:id/verify
+// Approva una specifica prova e aggiorna la classifica in tempo reale inviando un evento socket.
 router.post('/:id/verify', requireModerator, async (req, res) => {
   try {
     const comp = getCompById(req.params.id);
-    if (!comp || comp.status === 'completata' || comp.user_id === req.session.userId) {
+    if (!comp || comp.status === 'completata' || comp.status === 'rifiutata' || comp.user_id === req.session.userId) {
        return res.redirect('/completions/pending');
     }
     
-    verifyCompletion(req.params.id, req.session.userId);
+    const success = verifyCompletion(req.params.id, req.session.userId);
+    if (success) {
+      const io = req.app.get('io');
+      if (io) io.emit('leaderboard_update', { message: 'Classifica aggiornata' });
+    }
     
     res.redirect('/completions/pending');
   } catch (err) {
@@ -70,6 +104,11 @@ router.post('/:id/verify', requireModerator, async (req, res) => {
 router.post('/:id/reject', requireModerator, (req, res) => {
   const { feedback } = req.body;
   try {
+    const comp = getCompById(req.params.id);
+    if (!comp || comp.status === 'completata' || comp.status === 'rifiutata' || comp.user_id === req.session.userId) {
+       return res.redirect('/completions/pending');
+    }
+
     rejectCompletion(req.params.id, feedback, req.session.userId);
     res.redirect('/completions/pending');
   } catch (err) {
