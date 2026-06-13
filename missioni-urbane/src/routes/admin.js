@@ -1,5 +1,8 @@
-// Router dedicato esclusivamente alle operazioni amministrative (Admin HQ).
-// Qui si concentrano creazione, modifica e archiviazione delle missioni.
+/**
+ * Router per il pannello di amministrazione (Admin HQ).
+ * Gestisce la dashboard amministrativa e il ciclo di vita completo 
+ * delle missioni (creazione, lettura, aggiornamento, archiviazione).
+ */
 import express from 'express';
 import { requireAdmin } from '../middleware/auth.js';
 import { create as createMission, getAll, getById, update as updateMission, archive as archiveMission } from '../repositories/missions.repo.js';
@@ -8,24 +11,32 @@ import db from '../db/database.js';
 
 const router = express.Router();
 
-// Mostra la dashboard principale del pannello HQ
+/**
+ * GET /admin
+ * Mostra la dashboard principale del pannello amministrativo HQ.
+ */
 router.get('/', requireAdmin, (req, res) => {
-  res.render('admin/dashboard');
+  res.render(' ');
 });
 
-// Mostra il form vuoto per la creazione di una nuova missione
+/**
+ * GET /admin/create-mission
+ * Renderizza il modulo per la creazione di una nuova missione.
+ */
 router.get('/create-mission', requireAdmin, (req, res) => {
   res.render('admin/create-mission');
 });
 
-// Gestisce la ricezione dei dati del form di creazione
+/**
+ * POST /admin/create-mission
+ * Elabora i dati inviati per la creazione di una missione.
+ */
 router.post('/create-mission', requireAdmin, (req, res) => {
-  // Prima di scrivere a database, effettuiamo una validazione robusta dei campi.
-  // Utilizziamo un modulo utility esterno per mantenere pulito il controller.
+  // Esegue la validazione dei dati in ingresso tramite utility dedicata
   const { errors, data } = validateMissionInput(req.body);
 
   if (errors.length > 0) {
-    // Se ci sono errori, re-renderizziamo il form ripopolandolo con i dati appena inviati (formData) e mostrando la lista degli errori.
+    // In caso di validazione fallita, re-renderizza il modulo mantenendo i dati inseriti e mostrando gli errori
     return res.render('admin/create-mission', { errors, formData: data });
   }
 
@@ -44,10 +55,14 @@ router.post('/create-mission', requireAdmin, (req, res) => {
   }
 });
 
-// Elenca tutte le missioni (comprese le archiviate) per la gestione da parte dell'admin
+/**
+ * GET /admin/missions
+ * Recupera ed elenca tutte le missioni presenti nel sistema, incluse quelle archiviate, 
+ * per consentirne la gestione completa da parte dell'amministratore.
+ */
 router.get('/missions', requireAdmin, (req, res) => {
   try {
-    // A differenza di 'getAll' generico, qui eseguiamo una query diretta che ignora lo stato 'attiva'.
+    // Esegue una query diretta per bypassare i filtri sullo stato (es. 'attiva') previsti dai metodi generici
     const missions = db.prepare('SELECT * FROM missions ORDER BY created_at DESC').all();
     res.render('admin/missions-list', { missions });
   } catch (err) {
@@ -56,14 +71,17 @@ router.get('/missions', requireAdmin, (req, res) => {
   }
 });
 
-// Mostra il form per la modifica di una missione esistente
+/**
+ * GET /admin/missions/:id/edit
+ * Renderizza il modulo di modifica precompilato per una specifica missione esistente.
+ */
 router.get('/missions/:id/edit', requireAdmin, (req, res) => {
   try {
     const mission = getById(req.params.id);
     if (!mission) {
       return res.redirect('/admin/missions');
     }
-    // Passiamo la missione come `formData` così il partial Handlebars _mission-form la pre-compilerà
+    // Passa i dati della missione come `formData` per consentire la precompilazione del partial Handlebars `_mission-form`
     res.render('admin/edit-mission', { formData: mission });
   } catch (err) {
     console.error('Errore get edit mission:', err);
@@ -71,12 +89,15 @@ router.get('/missions/:id/edit', requireAdmin, (req, res) => {
   }
 });
 
-// Processa l'update dei campi di una missione già esistente
+/**
+ * POST /admin/missions/:id/update
+ * Elabora i dati inviati per l'aggiornamento di una missione esistente.
+ */
 router.post('/missions/:id/update', requireAdmin, (req, res) => {
   const { errors, data } = validateMissionInput(req.body);
 
   if (errors.length > 0) {
-    data.id = req.params.id; // mantieni l'id per il form
+    data.id = req.params.id; // Conserva l'ID della missione per permettere il corretto funzionamento del modulo in caso di errore
     return res.render('admin/edit-mission', { errors, formData: data });
   }
 
@@ -86,7 +107,7 @@ router.post('/missions/:id/update', requireAdmin, (req, res) => {
       title: data.title.trim(), description: data.description.trim(),
       location: data.location.trim(), lat: data.lat || null, lng: data.lng || null,
       points: pts, difficulty: data.difficulty, category: data.category,
-      status: req.body.status || 'attiva' // Assumi attiva o recupera dal body
+      status: req.body.status || 'attiva' // Imposta lo stato fornito dal modulo o adotta 'attiva' come fallback
     });
     res.redirect('/admin/missions');
   } catch (err) {
@@ -96,6 +117,10 @@ router.post('/missions/:id/update', requireAdmin, (req, res) => {
   }
 });
 
+/**
+ * POST /admin/missions/:id/archive
+ * Archivia una missione rendendola non più visibile o completabile dagli utenti standard.
+ */
 router.post('/missions/:id/archive', requireAdmin, (req, res) => {
   try {
     archiveMission(req.params.id);
