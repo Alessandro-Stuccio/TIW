@@ -81,7 +81,7 @@ export const assignBadges = (userId) => {
     if (b.condition === '5_missions' && completions.length >= 5) earned = true;
     if (b.condition === '10_missions' && completions.length >= 10) earned = true;
     if (b.condition === 'has_photo' && completions.some(c => c.proof_image !== null)) earned = true;
-    if (b.condition === 'all_categories' && cats.size >= 4) earned = true;
+    if (b.condition === 'all_categories' && cats.size >= 5) earned = true;
     
     if (earned) {
       try {
